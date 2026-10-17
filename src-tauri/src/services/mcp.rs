@@ -219,6 +219,10 @@ impl McpService {
             }
             AppType::Mcode => mcp::mcode::sync(&server.id, Some(&server.server))?,
             AppType::Pi => mcp::pi::sync(&server.id, Some(&server.server))?,
+            AppType::Cursor => {
+                // Cursor MCP support: sync to ~/.cursor/mcp.json
+                mcp::cursor::sync(&Default::default(), &server.id, Some(&server.server))?;
+            }
         }
         Ok(())
     }
@@ -260,6 +264,9 @@ impl McpService {
             }
             AppType::Mcode => mcp::mcode::sync(id, None)?,
             AppType::Pi => mcp::pi::sync(id, None)?,
+            AppType::Cursor => {
+                mcp::cursor::sync(&Default::default(), id, None)?;
+            }
         }
         Ok(())
     }

@@ -95,6 +95,7 @@ impl Database {
             // These applications intentionally have no MCP flag in the SSOT.
             AppType::Mcode => Some("enabled_mcode"),
             AppType::Pi => Some("enabled_pi"),
+            AppType::Cursor => Some("enabled_cursor"),
             AppType::ClaudeDesktop | AppType::OpenClaw => None,
         };
 

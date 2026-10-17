@@ -41,3 +41,4 @@ pub use opencode::{
 
 pub(crate) mod mcode;
 pub(crate) mod pi;
+pub(crate) mod cursor;

@@ -9,6 +9,7 @@ pub(crate) mod codex_direct;
 mod codex_editor;
 mod codex_login;
 pub(crate) mod codex_official_models;
+pub(crate) mod cursor_direct;
 mod editor_toml;
 mod endpoints;
 mod gemini_auth;
@@ -7017,7 +7018,7 @@ impl ProviderService {
             AppType::OpenCode => Self::extract_opencode_common_config(&provider.settings_config),
             AppType::OpenClaw => Self::extract_openclaw_common_config(&provider.settings_config),
             AppType::Hermes => Ok(String::new()), // Hermes doesn't use common config snippets
-            AppType::Pi | AppType::Mcode => Ok(String::new()),
+            AppType::Pi | AppType::Mcode | AppType::Cursor => Ok(String::new()),
         }
     }
 
@@ -7035,7 +7036,7 @@ impl ProviderService {
             AppType::OpenCode => Self::extract_opencode_common_config(settings_config),
             AppType::OpenClaw => Self::extract_openclaw_common_config(settings_config),
             AppType::Hermes => Ok(String::new()), // Hermes doesn't use common config snippets
-            AppType::Pi | AppType::Mcode => Ok(String::new()),
+            AppType::Pi | AppType::Mcode | AppType::Cursor => Ok(String::new()),
         }
     }
 
@@ -7803,6 +7804,16 @@ impl ProviderService {
             AppType::Pi => {
                 crate::pi_config::validate_provider_node(&provider.id, &provider.settings_config)?;
             }
+            AppType::Cursor => {
+                // Cursor: accept any JSON object for now
+                if !provider.settings_config.is_object() {
+                    return Err(AppError::localized(
+                        "provider.cursor.settings.not_object",
+                        "Cursor 配置必须是 JSON 对象",
+                        "Cursor configuration must be a JSON object",
+                    ));
+                }
+            }
         }
 
         // Validate and clean UsageScript configuration (common for all app types)
@@ -8001,7 +8012,7 @@ impl ProviderService {
 
                 Ok((api_key, base_url))
             }
-            AppType::OpenClaw | AppType::Hermes | AppType::Pi | AppType::Mcode => {
+            AppType::OpenClaw | AppType::Hermes | AppType::Pi | AppType::Mcode | AppType::Cursor => {
                 // These native formats use apiKey and baseUrl directly on the object.
                 let api_key = provider
                     .settings_config
@@ -8020,6 +8031,32 @@ impl ProviderService {
                     .settings_config
                     .get("baseUrl")
                     .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+
+                Ok((api_key, base_url))
+            }
+            AppType::Cursor => {
+                // Cursor uses apiKey and baseUrl (may be under config.cursor or top-level)
+                let api_key = provider
+                    .settings_config
+                    .pointer("/config/cursor/apiKey")
+                    .and_then(|v| v.as_str())
+                    .or_else(|| provider.settings_config.get("apiKey").and_then(|v| v.as_str()))
+                    .ok_or_else(|| {
+                        AppError::localized(
+                            "provider.cursor.api_key.missing",
+                            "缺少 API Key",
+                            "API key is missing",
+                        )
+                    })?
+                    .to_string();
+
+                let base_url = provider
+                    .settings_config
+                    .pointer("/config/cursor/baseUrl")
+                    .and_then(|v| v.as_str())
+                    .or_else(|| provider.settings_config.get("baseUrl").and_then(|v| v.as_str()))
                     .unwrap_or("")
                     .to_string();
 

@@ -1138,7 +1138,7 @@ impl SkillService {
 
                     // 其他应用沿用既有的逐项容错行为。
                     for app in AppType::all() {
-                        if matches!(app, AppType::Pi | AppType::Mcode) {
+                        if matches!(app, AppType::Pi | AppType::Mcode | AppType::Cursor) {
                             continue;
                         }
                         let _ = Self::remove_from_app_preserving(
@@ -1677,7 +1677,7 @@ impl SkillService {
 
         // 同步到所有已启用的应用目录
         for app in updated_skill.apps.enabled_apps() {
-            if matches!(app, AppType::Pi | AppType::Mcode) {
+            if matches!(app, AppType::Pi | AppType::Mcode | AppType::Cursor) {
                 continue;
             }
             if let Err(e) = Self::sync_to_app_dir(&updated_skill.directory, &app) {
@@ -2318,7 +2318,7 @@ impl SkillService {
             // 已经在应用目录里的保持原样；投影失败就不记这个应用的启用，
             // 让库里的标志始终等于磁盘上的事实。
             for app in AppType::all() {
-                if matches!(app, AppType::Pi | AppType::Mcode)
+                if matches!(app, AppType::Pi | AppType::Mcode | AppType::Cursor)
                     || !apps.is_enabled_for(&app)
                     || Self::skill_exists_in_app(&dir_name, &app)
                 {
@@ -2423,7 +2423,7 @@ impl SkillService {
     fn preflight_install_destination(source: &Path, directory: &str, app: &AppType) -> Result<()> {
         let ssot_dir = Self::get_ssot_dir()?;
         let app_dir = Self::get_distinct_app_skills_dir(&ssot_dir, app)?;
-        if !matches!(app, AppType::Pi | AppType::Mcode) {
+        if !matches!(app, AppType::Pi | AppType::Mcode | AppType::Cursor) {
             return Ok(());
         }
         let destination = app_dir.join(directory);
@@ -2597,7 +2597,7 @@ impl SkillService {
 
         let dest = app_dir.join(&directory);
 
-        if matches!(app, AppType::Pi | AppType::Mcode) && (dest.exists() || Self::is_symlink(&dest))
+        if matches!(app, AppType::Pi | AppType::Mcode | AppType::Cursor) && (dest.exists() || Self::is_symlink(&dest))
         {
             Self::ensure_pi_skill_destination_matches(&source, &dest, &directory)?;
         }
@@ -2794,7 +2794,7 @@ impl SkillService {
         }
 
         if skill_path.exists() || Self::is_symlink(&skill_path) {
-            if matches!(app, AppType::Pi | AppType::Mcode) {
+            if matches!(app, AppType::Pi | AppType::Mcode | AppType::Cursor) {
                 let source = ssot_dir.join(&directory);
                 Self::ensure_pi_skill_destination_matches(&source, &skill_path, &directory)?;
             }

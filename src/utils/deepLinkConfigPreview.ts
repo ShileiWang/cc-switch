@@ -4,7 +4,7 @@ import { decodeBase64Utf8 } from "@/lib/utils/base64";
 import { isSensitiveConfigKey, maskSensitiveValue } from "@/utils/deeplinkRisk";
 
 export interface ParsedDeepLinkConfig {
-  type: "claude" | "codex" | "gemini" | "grokbuild";
+  type: "claude" | "codex" | "cursor" | "gemini" | "grokbuild";
   env?: Record<string, string>;
   auth?: Record<string, string>;
   tomlConfig?: string;

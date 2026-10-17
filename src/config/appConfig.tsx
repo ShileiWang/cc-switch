@@ -20,6 +20,7 @@ export const APP_IDS: AppId[] = [
   "claude",
   "claude-desktop",
   "codex",
+  "cursor",
   "gemini",
   "grokbuild",
   "opencode",
@@ -33,6 +34,7 @@ export const DEFAULT_VISIBLE_APPS: VisibleApps = {
   claude: true,
   "claude-desktop": true,
   codex: true,
+  cursor: true,
   gemini: true,
   grokbuild: true,
   opencode: true,
@@ -56,13 +58,14 @@ export const SKILLS_APP_IDS: AppId[] = [
 
 export type ProxyAppId = Extract<
   AppId,
-  "claude" | "codex" | "gemini" | "grokbuild"
+  "claude" | "codex" | "cursor" | "gemini" | "grokbuild"
 >;
 
 /** Apps with a complete local gateway + failover data plane. */
 export const PROXY_APP_IDS: ProxyAppId[] = [
   "claude",
   "codex",
+  "cursor",
   "gemini",
   "grokbuild",
 ];
@@ -123,6 +126,7 @@ export function isAdditiveAppId(appId: string): appId is AdditiveAppId {
 export const EDITOR_VIEW_APP_IDS: AppId[] = [
   "claude",
   "codex",
+  "cursor",
   "gemini",
   "grokbuild",
 ];
@@ -136,6 +140,7 @@ export type McpAppId = Exclude<AppId, "claude-desktop" | "openclaw">;
 export const MCP_APP_IDS: McpAppId[] = [
   "claude",
   "codex",
+  "cursor",
   "gemini",
   "grokbuild",
   "opencode",
@@ -172,6 +177,21 @@ export const APP_ICON_MAP: Record<AppId, AppConfig> = {
       "bg-green-500/10 ring-1 ring-green-500/20 hover:bg-green-500/20 text-green-600 dark:text-green-400",
     badgeClass:
       "bg-green-500/10 text-green-700 dark:text-green-300 hover:bg-green-500/20 border-0 gap-1.5",
+  },
+  cursor: {
+    label: "Cursor",
+    icon: (
+      <ProviderIcon
+        icon="cursor"
+        name="Cursor"
+        size={14}
+        showFallback={false}
+      />
+    ),
+    activeClass:
+      "bg-teal-500/10 ring-1 ring-teal-500/20 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400",
+    badgeClass:
+      "bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/20 border-0 gap-1.5",
   },
   gemini: {
     label: "Gemini",

@@ -1085,3 +1085,47 @@ pub fn get_claude_config_status() -> ConfigStatus {
         path: path.to_string_lossy().to_string(),
     }
 }
+
+/// 获取 Cursor 配置目录路径
+///
+/// - Windows: `%APPDATA%\Cursor\User`
+/// - macOS: `~/Library/Application Support/Cursor/User`
+/// - Linux: `~/.config/Cursor/User`
+pub fn get_cursor_config_dir() -> PathBuf {
+    if let Some(custom) = crate::settings::get_cursor_override_dir() {
+        return custom;
+    }
+
+    let home = get_home_dir();
+    if cfg!(windows) {
+        // Windows: %APPDATA%\Cursor\User
+        std::env::var("APPDATA")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| home.join("AppData").join("Roaming"))
+            .join("Cursor")
+            .join("User")
+    } else if cfg!(target_os = "macos") {
+        // macOS: ~/Library/Application Support/Cursor/User
+        home.join("Library")
+            .join("Application Support")
+            .join("Cursor")
+            .join("User")
+    } else {
+        // Linux: ~/.config/Cursor/User
+        let xdg_config = std::env::var("XDG_CONFIG_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| home.join(".config"));
+        xdg_config.join("Cursor").join("User")
+    }
+}
+
+/// 获取 Cursor 主配置文件路径（settings.json）
+pub fn get_cursor_settings_path() -> PathBuf {
+    get_cursor_config_dir().join("settings.json")
+}
+
+/// 获取 Cursor MCP 配置文件路径（~/.cursor/mcp.json）
+pub fn get_cursor_mcp_path() -> PathBuf {
+    let home = get_home_dir();
+    home.join(".cursor").join("mcp.json")
+}

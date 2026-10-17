@@ -345,6 +345,7 @@ pub(crate) fn build_provider_from_request(
                 "Add MCode providers from the MCode page".into(),
             ))
         }
+        AppType::Cursor => build_additive_app_settings(request, api_format),
     };
 
     // Build usage script configuration if provided

@@ -8,6 +8,7 @@ use crate::live::engine::sha256_hex;
 use serde_json::{json, Map, Value};
 
 use crate::live::project::claude::ClaudeProjection;
+use crate::live::project::cursor::CursorProjection;
 use crate::live::project::gemini::GeminiProjection;
 use crate::live::project::grok::GrokProjection;
 
@@ -58,6 +59,19 @@ pub fn grok(projection: &GrokProjection) -> Contract {
         version: CONTRACT_VERSION,
         key: key_of(&json!({
             "app": "grokbuild",
+            "version": CONTRACT_VERSION,
+            "projection": projection.to_value(),
+        })),
+        exclusive: Map::new(),
+    }
+}
+
+/// Cursor IDE：代理契约就是 `cursor.general.*` 下要写的那几个键。
+pub fn cursor(projection: &CursorProjection) -> Contract {
+    Contract {
+        version: CONTRACT_VERSION,
+        key: key_of(&json!({
+            "app": "cursor",
             "version": CONTRACT_VERSION,
             "projection": projection.to_value(),
         })),

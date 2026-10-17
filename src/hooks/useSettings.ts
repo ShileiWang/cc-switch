@@ -56,6 +56,7 @@ const DIRECTORY_KEYS = [
   "claudeConfigDir",
   "codexConfigDir",
   "geminiConfigDir",
+  "cursorConfigDir",
   "grokConfigDir",
   "opencodeConfigDir",
   "openclawConfigDir",
@@ -128,6 +129,7 @@ export function useSettings(): UseSettingsResult {
       claude: sanitizeDir(data?.claudeConfigDir),
       codex: sanitizeDir(data?.codexConfigDir),
       gemini: sanitizeDir(data?.geminiConfigDir),
+      cursor: sanitizeDir(data?.cursorConfigDir),
       grokbuild: sanitizeDir(data?.grokConfigDir),
       opencode: sanitizeDir(data?.opencodeConfigDir),
       openclaw: sanitizeDir(data?.openclawConfigDir),
@@ -212,6 +214,7 @@ export function useSettings(): UseSettingsResult {
         const sanitizedClaudeDir = sanitizeDir(mergedSettings.claudeConfigDir);
         const sanitizedCodexDir = sanitizeDir(mergedSettings.codexConfigDir);
         const sanitizedGeminiDir = sanitizeDir(mergedSettings.geminiConfigDir);
+        const sanitizedCursorDir = sanitizeDir(mergedSettings.cursorConfigDir);
         const sanitizedGrokDir = sanitizeDir(mergedSettings.grokConfigDir);
         const sanitizedOpencodeDir = sanitizeDir(
           mergedSettings.opencodeConfigDir,
@@ -231,6 +234,7 @@ export function useSettings(): UseSettingsResult {
           claudeConfigDir: sanitizedClaudeDir,
           codexConfigDir: sanitizedCodexDir,
           geminiConfigDir: sanitizedGeminiDir,
+          cursorConfigDir: sanitizedCursorDir,
           grokConfigDir: sanitizedGrokDir,
           opencodeConfigDir: sanitizedOpencodeDir,
           openclawConfigDir: sanitizedOpenclawDir,
@@ -347,6 +351,7 @@ export function useSettings(): UseSettingsResult {
         const sanitizedClaudeDir = sanitizeDir(mergedSettings.claudeConfigDir);
         const sanitizedCodexDir = sanitizeDir(mergedSettings.codexConfigDir);
         const sanitizedGeminiDir = sanitizeDir(mergedSettings.geminiConfigDir);
+        const sanitizedCursorDir = sanitizeDir(mergedSettings.cursorConfigDir);
         const sanitizedGrokDir = sanitizeDir(mergedSettings.grokConfigDir);
         const sanitizedOpencodeDir = sanitizeDir(
           mergedSettings.opencodeConfigDir,
@@ -359,6 +364,7 @@ export function useSettings(): UseSettingsResult {
         const previousClaudeDir = sanitizeDir(data?.claudeConfigDir);
         const previousCodexDir = sanitizeDir(data?.codexConfigDir);
         const previousGeminiDir = sanitizeDir(data?.geminiConfigDir);
+        const previousCursorDir = sanitizeDir(data?.cursorConfigDir);
         const previousGrokDir = sanitizeDir(data?.grokConfigDir);
         const previousOpencodeDir = sanitizeDir(data?.opencodeConfigDir);
         const previousOpenclawDir = sanitizeDir(data?.openclawConfigDir);
@@ -374,6 +380,7 @@ export function useSettings(): UseSettingsResult {
           claudeConfigDir: sanitizedClaudeDir,
           codexConfigDir: sanitizedCodexDir,
           geminiConfigDir: sanitizedGeminiDir,
+          cursorConfigDir: sanitizedCursorDir,
           grokConfigDir: sanitizedGrokDir,
           opencodeConfigDir: sanitizedOpencodeDir,
           openclawConfigDir: sanitizedOpenclawDir,
@@ -464,6 +471,7 @@ export function useSettings(): UseSettingsResult {
         const claudeDirChanged = sanitizedClaudeDir !== previousClaudeDir;
         const codexDirChanged = sanitizedCodexDir !== previousCodexDir;
         const geminiDirChanged = sanitizedGeminiDir !== previousGeminiDir;
+        const cursorDirChanged = sanitizedCursorDir !== previousCursorDir;
         const grokDirChanged = sanitizedGrokDir !== previousGrokDir;
         const opencodeDirChanged = sanitizedOpencodeDir !== previousOpencodeDir;
         const openclawDirChanged = sanitizedOpenclawDir !== previousOpenclawDir;
@@ -473,6 +481,7 @@ export function useSettings(): UseSettingsResult {
           (claudeDirChanged ||
             codexDirChanged ||
             geminiDirChanged ||
+            cursorDirChanged ||
             grokDirChanged ||
             opencodeDirChanged ||
             openclawDirChanged)

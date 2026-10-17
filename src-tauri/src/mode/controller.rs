@@ -46,11 +46,12 @@ use super::state::{op, Contract, Mode, ModeState, PendingTarget, StackState};
 
 /// 有路由模式的应用（[`AppType::has_route_mode`]）。Claude Desktop 也在内：它经同一个路由
 /// 服务转发，只是没有故障转移。
-pub const PROXY_APPS: [AppType; 5] = [
+pub const PROXY_APPS: [AppType; 6] = [
     AppType::Claude,
     AppType::Codex,
     AppType::Gemini,
     AppType::GrokBuild,
+    AppType::Cursor,
     AppType::ClaudeDesktop,
 ];
 
@@ -488,6 +489,21 @@ async fn write_proxy(
             .map_err(err)?;
             unchanged
         }
+        AppType::Cursor => {
+            let projection =
+                crate::live::project::cursor::CursorProjection::proxy_contract(&proxy_url);
+            let contract = contract::cursor(&projection);
+            let unchanged = !force && live_now.has_contract(&contract.key);
+            target.contract = Some(contract);
+            crate::services::provider::cursor_direct::run(
+                &state.db,
+                op_name,
+                (!unchanged).then_some(&projection),
+                pending(target),
+            )
+            .map_err(err)?;
+            unchanged
+        }
         AppType::ClaudeDesktop => {
             let members = published_members(state, app, &stack, route)?;
             let profile = claude_desktop_config::route_profile(
@@ -593,6 +609,23 @@ fn write_direct(
                 &state.db,
                 op_name,
                 None,
+                projection.as_ref(),
+                pending_target,
+            )
+            .map_err(err)?;
+        }
+        AppType::Cursor => {
+            let projection = attached.then(|| {
+                direct_or_empty(
+                    app,
+                    direct.as_ref(),
+                    crate::services::provider::cursor_direct::projection,
+                    crate::live::project::cursor::CursorProjection::empty,
+                )
+            });
+            crate::services::provider::cursor_direct::run(
+                &state.db,
+                op_name,
                 projection.as_ref(),
                 pending_target,
             )

@@ -1063,6 +1063,7 @@
     "claudeDesktop": "Claude Desktop",
     "claude-desktop": "Claude Desktop",
     "codex": "Codex",
+    "cursor": "Cursor",
     "gemini": "Gemini",
     "grokbuild": "Grok Build",
     "opencode": "OpenCode",
@@ -2176,6 +2177,7 @@
       "all": "Tümü",
       "claude": "Claude Code",
       "codex": "Codex",
+      "cursor": "Cursor",
       "gemini": "Gemini",
       "opencode": "OpenCode",
       "grokbuild": "Grok Build",
@@ -2622,6 +2624,7 @@
       "apps": {
         "claude": "Claude",
         "codex": "Codex",
+        "cursor": "Cursor",
         "gemini": "Gemini",
         "grokbuild": "Grok Build",
         "opencode": "OpenCode",

@@ -22,6 +22,7 @@ import {
 const DIRECTORY_FIELD: Record<DirectoryAppId, keyof Settings> = {
   claude: "claudeConfigDir",
   codex: "codexConfigDir",
+  cursor: "cursorConfigDir",
   gemini: "geminiConfigDir",
   grokbuild: "grokConfigDir",
   opencode: "opencodeConfigDir",
@@ -33,6 +34,7 @@ const DIRECTORY_FIELD: Record<DirectoryAppId, keyof Settings> = {
 const DIRECTORY_PLACEHOLDER: Record<DirectoryAppId, string> = {
   claude: "settings.browsePlaceholderClaude",
   codex: "settings.browsePlaceholderCodex",
+  cursor: "settings.browsePlaceholderCursor",
   gemini: "settings.browsePlaceholderGemini",
   grokbuild: "settings.browsePlaceholderGrok",
   opencode: "settings.browsePlaceholderOpencode",
@@ -44,6 +46,7 @@ const DIRECTORY_PLACEHOLDER: Record<DirectoryAppId, string> = {
 const DIRECTORY_APPS: DirectoryAppId[] = [
   "claude",
   "codex",
+  "cursor",
   "gemini",
   "grokbuild",
   "opencode",

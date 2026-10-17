@@ -466,6 +466,8 @@ export interface Settings {
   codexConfigDir?: string;
   // 覆盖 Gemini 配置目录（可选）
   geminiConfigDir?: string;
+  // 覆盖 Cursor 配置目录（可选）
+  cursorConfigDir?: string;
   // 覆盖 Grok Build 配置目录（可选）
   grokConfigDir?: string;
   // 覆盖 OpenCode 配置目录（可选）

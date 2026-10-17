@@ -23,6 +23,8 @@ pub struct McpApps {
     pub hermes: bool,
     #[serde(default)]
     pub pi: bool,
+    #[serde(default)]
+    pub cursor: bool,
 }
 
 impl McpApps {
@@ -38,6 +40,7 @@ impl McpApps {
             AppType::Hermes => self.hermes,
             AppType::Mcode => self.mcode,
             AppType::Pi => self.pi,
+            AppType::Cursor => self.cursor,
             AppType::ClaudeDesktop => false,
         }
     }
@@ -54,6 +57,7 @@ impl McpApps {
             AppType::Hermes => self.hermes = enabled,
             AppType::Mcode => self.mcode = enabled,
             AppType::Pi => self.pi = enabled,
+            AppType::Cursor => self.cursor = enabled,
             AppType::ClaudeDesktop => {} // Claude Desktop 3P provider config doesn't support MCP here
         }
     }
@@ -85,6 +89,9 @@ impl McpApps {
         if self.pi {
             apps.push(AppType::Pi);
         }
+        if self.cursor {
+            apps.push(AppType::Cursor);
+        }
         apps
     }
 
@@ -98,6 +105,7 @@ impl McpApps {
             && !self.hermes
             && !self.mcode
             && !self.pi
+            && !self.cursor
     }
 }
 
@@ -120,6 +128,8 @@ pub struct SkillApps {
     pub hermes: bool,
     #[serde(default)]
     pub pi: bool,
+    #[serde(default)]
+    pub cursor: bool,
 }
 
 impl SkillApps {
@@ -134,6 +144,7 @@ impl SkillApps {
             AppType::Hermes => self.hermes,
             AppType::Pi => self.pi,
             AppType::Mcode => self.mcode,
+            AppType::Cursor => self.cursor,
             AppType::OpenClaw => false, // OpenClaw doesn't support Skills
             AppType::ClaudeDesktop => false,
         }
@@ -150,6 +161,7 @@ impl SkillApps {
             AppType::Hermes => self.hermes = enabled,
             AppType::Pi => self.pi = enabled,
             AppType::Mcode => self.mcode = enabled,
+            AppType::Cursor => self.cursor = enabled,
             AppType::OpenClaw => {} // OpenClaw doesn't support Skills, ignore
             AppType::ClaudeDesktop => {} // Claude Desktop 3P profiles don't use CC Switch skill sync
         }
@@ -182,6 +194,9 @@ impl SkillApps {
         if self.pi {
             apps.push(AppType::Pi);
         }
+        if self.cursor {
+            apps.push(AppType::Cursor);
+        }
         apps
     }
 
@@ -195,6 +210,7 @@ impl SkillApps {
             && !self.hermes
             && !self.mcode
             && !self.pi
+            && !self.cursor
     }
 
     /// 仅启用指定应用（其他应用设为禁用）
@@ -338,6 +354,9 @@ pub struct McpRoot {
     /// Hermes MCP 配置（实际使用 config.yaml）
     #[serde(default, skip_serializing_if = "McpConfig::is_empty")]
     pub hermes: McpConfig,
+    /// Cursor MCP 配置（实际使用 ~/.cursor/mcp.json）
+    #[serde(default, skip_serializing_if = "McpConfig::is_empty")]
+    pub cursor: McpConfig,
 }
 
 impl Default for McpRoot {
@@ -354,6 +373,7 @@ impl Default for McpRoot {
             opencode: McpConfig::default(),
             openclaw: McpConfig::default(),
             hermes: McpConfig::default(),
+            cursor: McpConfig::default(),
         }
     }
 }
@@ -389,6 +409,8 @@ pub struct PromptRoot {
     pub openclaw: PromptConfig,
     #[serde(default)]
     pub hermes: PromptConfig,
+    #[serde(default)]
+    pub cursor: PromptConfig,
 }
 
 use crate::config::{copy_file, get_app_config_dir, get_app_config_path, write_json_file};
@@ -415,6 +437,7 @@ pub enum AppType {
     Hermes,
     Pi,
     Mcode,
+    Cursor,
 }
 
 impl AppType {
@@ -430,12 +453,13 @@ impl AppType {
             AppType::Hermes => "hermes",
             AppType::Pi => "pi",
             AppType::Mcode => "mcode",
+            AppType::Cursor => "cursor",
         }
     }
 
     /// Check if this app uses additive mode
     ///
-    /// - Switch mode (false): Only the current provider is written to live config (Claude, Codex, Gemini)
+    /// - Switch mode (false): Only the current provider is written to live config (Claude, Codex, Gemini, Cursor)
     /// - Additive mode (true): Providers coexist in native config and can be enabled independently
     ///   (OpenCode, OpenClaw, Hermes, Pi)
     pub fn is_additive_mode(&self) -> bool {
@@ -448,11 +472,15 @@ impl AppType {
     pub fn supports_local_proxy(&self) -> bool {
         matches!(
             self,
-            AppType::Claude | AppType::Codex | AppType::Gemini | AppType::GrokBuild
+            AppType::Claude
+                | AppType::Codex
+                | AppType::Gemini
+                | AppType::GrokBuild
+                | AppType::Cursor
         )
     }
 
-    /// 有设备级的直连 / 路由模式（`live-state.json`，`mode::controller`）：本地路由的四个应用，
+    /// 有设备级的直连 / 路由模式（`live-state.json`，`mode::controller`）：本地路由的四个应用+Cursor，
     /// 加上 Claude Desktop。Desktop 经同一个路由服务转发，但没有 `proxy_config` 行、不做故障
     /// 转移，所以不算 [`Self::supports_local_proxy`]。
     pub fn has_route_mode(&self) -> bool {
@@ -472,6 +500,7 @@ impl AppType {
             AppType::Hermes,
             AppType::Pi,
             AppType::Mcode,
+            AppType::Cursor,
         ]
         .into_iter()
     }
@@ -493,10 +522,11 @@ impl FromStr for AppType {
             "hermes" => Ok(AppType::Hermes),
             "pi" => Ok(AppType::Pi),
             "mcode" => Ok(AppType::Mcode),
+            "cursor" => Ok(AppType::Cursor),
             other => Err(AppError::localized(
                 "unsupported_app",
-                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi。"),
-                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi."),
+                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, cursor。"),
+                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, cursor."),
             )),
         }
     }
@@ -596,6 +626,7 @@ impl Default for MultiAppConfig {
         apps.insert("opencode".to_string(), ProviderManager::default());
         apps.insert("openclaw".to_string(), ProviderManager::default());
         apps.insert("hermes".to_string(), ProviderManager::default());
+        apps.insert("cursor".to_string(), ProviderManager::default());
 
         Self {
             version: 2,
@@ -786,6 +817,7 @@ impl MultiAppConfig {
             || !self.prompts.opencode.prompts.is_empty()
             || !self.prompts.openclaw.prompts.is_empty()
             || !self.prompts.hermes.prompts.is_empty()
+            || !self.prompts.cursor.prompts.is_empty()
         {
             return Ok(false);
         }
@@ -875,6 +907,7 @@ impl MultiAppConfig {
             AppType::OpenCode => &mut config.prompts.opencode.prompts,
             AppType::OpenClaw => &mut config.prompts.openclaw.prompts,
             AppType::Hermes => &mut config.prompts.hermes.prompts,
+            AppType::Cursor => &mut config.prompts.cursor.prompts,
             // Pi was added after prompts moved to SQLite. Keeping it out of
             // this legacy config avoids a second, unused prompt state.
             AppType::Pi | AppType::Mcode => return Ok(false),
@@ -921,7 +954,7 @@ impl MultiAppConfig {
                 AppType::OpenCode => &self.mcp.opencode.servers,
                 AppType::OpenClaw => continue, // OpenClaw MCP is still in development, skip
                 AppType::Hermes => continue,   // Hermes didn't exist in v3.6.x, skip
-                AppType::Pi | AppType::Mcode => continue, // Pi didn't exist in v3.6.x, skip
+                AppType::Pi | AppType::Mcode | AppType::Cursor => continue, // Pi/Cursor didn't exist in v3.6.x, skip
             };
 
             for (id, entry) in old_servers {

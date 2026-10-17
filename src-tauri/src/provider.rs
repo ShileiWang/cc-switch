@@ -235,6 +235,19 @@ impl Provider {
                     str_at(options.and_then(|o| o.get("apiKey"))),
                 )
             }
+            // Cursor BYOK: credentials at top-level or under config.cursor.
+            AppType::Cursor => (
+                str_at(
+                    settings
+                        .pointer("/config/cursor/baseUrl")
+                        .or_else(|| settings.get("baseUrl")),
+                ),
+                str_at(
+                    settings
+                        .pointer("/config/cursor/apiKey")
+                        .or_else(|| settings.get("apiKey")),
+                ),
+            ),
             // Claude and Claude Desktop both use the Anthropic-style env map, keeping
             // the OpenRouter/Google key fallbacks the JS-script path relies on.
             // Listed explicitly (not `_`) so a new AppType fails to compile here.
